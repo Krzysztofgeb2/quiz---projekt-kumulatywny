@@ -1,0 +1,14 @@
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.GeneratedMSBuildEditorConfig.editorconfig
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.AssemblyInfoInputs.cache
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.AssemblyInfo.cs
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.csproj.CoreCompileInputs.cache
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/bin/Debug/net8.0/projectC
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/bin/Debug/net8.0/projectC.deps.json
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/bin/Debug/net8.0/projectC.runtimeconfig.json
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/bin/Debug/net8.0/projectC.dll
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/bin/Debug/net8.0/projectC.pdb
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.dll
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/refint/projectC.dll
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.pdb
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/projectC.genruntimeconfig.cache
+/Users/krzysztofgeb/RiderProjects/projectC/projectC/obj/Debug/net8.0/ref/projectC.dll
