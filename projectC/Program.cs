@@ -1,32 +1,70 @@
 using System;
-using projectC.Abstractions;
-using projectC.Models;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using projectC;
 
 namespace projectC
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            IQuiz quiz = BuildQuiz();
+            await using var context = new QuizDbContext();
+            
+            await context.Database.MigrateAsync();
+            
+            await seeder.SeedAsync(context);
 
-            Console.WriteLine($"== {quiz.Title} ==");
+            Console.WriteLine("Projekt gotowy. Baza danych zawiera quizy.\n");
+            
+            var allQuizzes = await context.Quizzes.ToListAsync();
+            if (!allQuizzes.Any())
+            {
+                Console.WriteLine("Brak quizów w bazie!");
+                return;
+            }
+
+            Console.WriteLine("Dostępne quizy:");
+            for (int i = 0; i < allQuizzes.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {allQuizzes[i].Title}");
+            }
+
+            int quizChoice = ReadInt("Wybierz quiz: ", 1, allQuizzes.Count) - 1;
+            
+            var quiz = await context.Quizzes
+                .Include(q => q.Questions)
+                    .ThenInclude(q => q.Answers)
+                .FirstOrDefaultAsync(q => q.Id == allQuizzes[quizChoice].Id);
+
+            if (quiz == null)
+            {
+                Console.WriteLine("Wybrany quiz nie istnieje!");
+                return;
+            }
+
+            Console.WriteLine($"\n== {quiz.Title} ==");
 
             int score = 0;
-
+            
             foreach (var question in quiz.Questions)
             {
                 Console.WriteLine();
                 Console.WriteLine(question.Content);
 
-                for (int i = 0; i < question.Answers.Count; i++)
+                int i = 1;
+                foreach (var answer in question.Answers)
                 {
-                    Console.WriteLine($"{i + 1}. {question.Answers[i].Text}");
+                    Console.WriteLine($"{i}. {answer.Text}");
+                    i++;
                 }
 
-                int choice = ReadInt("Wybierz odpowiedź: ", 1, question.Answers.Count) - 1;
+                int choice = ReadInt("Wybierz odpowiedź: ", 1, question.Answers.Count);
+                
+                var selectedAnswer = question.Answers.ElementAt(choice - 1);
 
-                if (question.IsCorrectAnswer(choice))
+                if (selectedAnswer.IsCorrect)
                 {
                     Console.WriteLine("✔ Poprawna odpowiedź!");
                     score++;
@@ -41,27 +79,7 @@ namespace projectC
             Console.WriteLine($"Twój wynik: {score}/{quiz.Questions.Count}");
             Console.WriteLine("Koniec quizu!");
         }
-
-        private static IQuiz BuildQuiz()
-        {
-            var quiz = new Quiz("Quiz OOP");
-
-            var q1 = new Question("Co oznacza skrót OOP?");
-            q1.AddAnswer(new Answer("Object-Oriented Programming", true));
-            q1.AddAnswer(new Answer("Only One Programmer", false));
-            q1.AddAnswer(new Answer("Open Operation Protocol", false));
-
-            var q2 = new Question("Co jest podstawą programowania obiektowego?");
-            q2.AddAnswer(new Answer("Dziedziczenie", true));
-            q2.AddAnswer(new Answer("Tagowanie HTML", false));
-            q2.AddAnswer(new Answer("Formatowanie CSS", false));
-
-            quiz.AddQuestion(q1);
-            quiz.AddQuestion(q2);
-
-            return quiz;
-        }
-
+        
         private static int ReadInt(string message, int min, int max)
         {
             while (true)
