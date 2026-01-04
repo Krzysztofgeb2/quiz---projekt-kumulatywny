@@ -1,0 +1,63 @@
+@using QuizWebApp
+@inject QuizDbContext Db
+@using Microsoft.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+
+@if (quiz == null)
+{
+    <p>Ładowanie quizu...</p>
+}
+else if (finished)
+{
+    <h3>Koniec quizu 🎉</h3>
+    <p>Twój wynik: <b>@score / @quiz.Questions.Count</b></p>
+}
+else
+{
+    var question = quiz.Questions[currentQuestionIndex];
+
+    <h3>@question.Content</h3>
+
+    <ul>
+        @foreach (var answer in question.Answers)
+        {
+            <li>
+                <button @onclick="() => SelectAnswer(answer)">
+                    @answer.Text
+                </button>
+            </li>
+        }
+    </ul>
+
+    <p>Pytanie @(@currentQuestionIndex + 1) z @quiz.Questions.Count</p>
+}
+
+@code {
+    [Parameter]
+    public int QuizId { get; set; }
+
+    private QuizEntity? quiz;
+    private int currentQuestionIndex = 0;
+    private int score = 0;
+    private bool finished = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        quiz = await Db.Quizzes
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Answers)
+            .FirstOrDefaultAsync(q => q.Id == QuizId);
+    }
+
+    private void SelectAnswer(AnswerEntity answer)
+    {
+        if (answer.IsCorrect)
+            score++;
+
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex >= quiz!.Questions.Count)
+            finished = true;
+    }
+}
+}

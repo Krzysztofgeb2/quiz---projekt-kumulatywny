@@ -1,0 +1,29 @@
+@using QuizWebApp
+@inject QuizDbContext Db
+
+<h3>Dostępne quizy</h3>
+
+@if (quizzes == null)
+{
+    <p>Ładowanie quizów...</p>
+}
+else
+{
+    <ul>
+        @foreach (var quiz in quizzes)
+        {
+            <li>
+                <a href="/Quiz?id=@quiz.Id">@quiz.Title</a>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<QuizEntity>? quizzes;
+
+    protected override void OnInitialized()
+    {
+        quizzes = Db.Quizzes.ToList();
+    }
+}

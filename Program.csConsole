@@ -1,0 +1,102 @@
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using projectC;
+
+namespace projectC
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var context = new QuizDbContext();
+
+            // Wykonanie migracji – jeśli jeszcze nie były wykonane
+            context.Database.Migrate();
+
+            // Seedowanie danych do istniejącej bazy
+            seeder.Seed(context);
+
+            Console.WriteLine("Projekt gotowy. Baza danych zawiera quizy.\n");
+
+            // 🔹 Pobranie dostępnych quizów z bazy
+            var allQuizzes = context.Quizzes.ToList();
+            if (!allQuizzes.Any())
+            {
+                Console.WriteLine("Brak quizów w bazie!");
+                return;
+            }
+
+            Console.WriteLine("Dostępne quizy:");
+            for (int i = 0; i < allQuizzes.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {allQuizzes[i].Title}");
+            }
+
+            int quizChoice = ReadInt("Wybierz quiz: ", 1, allQuizzes.Count) - 1;
+
+            // 🔹 Pobranie wybranego quizu z pytaniami i odpowiedziami
+            var quiz = context.Quizzes
+                .Include(q => q.Questions)
+                    .ThenInclude(q => q.Answers)
+                .FirstOrDefault(q => q.Id == allQuizzes[quizChoice].Id);
+
+            if (quiz == null)
+            {
+                Console.WriteLine("Wybrany quiz nie istnieje!");
+                return;
+            }
+
+            Console.WriteLine($"\n== {quiz.Title} ==");
+
+            int score = 0;
+
+            // 🔹 Pętla po pytaniach i odpowiedziach
+            foreach (var question in quiz.Questions)
+            {
+                Console.WriteLine();
+                Console.WriteLine(question.Content);
+
+                int i = 1;
+                foreach (var answer in question.Answers)
+                {
+                    Console.WriteLine($"{i}. {answer.Text}");
+                    i++;
+                }
+
+                int choice = ReadInt("Wybierz odpowiedź: ", 1, question.Answers.Count);
+
+                // Pobranie odpowiedzi po indeksie przy pomocy ElementAt
+                var selectedAnswer = question.Answers.ElementAt(choice - 1);
+
+                if (selectedAnswer.IsCorrect)
+                {
+                    Console.WriteLine("✔ Poprawna odpowiedź!");
+                    score++;
+                }
+                else
+                {
+                    Console.WriteLine("✖ Błędna odpowiedź.");
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"Twój wynik: {score}/{quiz.Questions.Count}");
+            Console.WriteLine("Koniec quizu!");
+        }
+
+        // 🔹 Metoda do odczytu liczby z konsoli w zakresie
+        private static int ReadInt(string message, int min, int max)
+        {
+            while (true)
+            {
+                Console.Write(message);
+                if (int.TryParse(Console.ReadLine(), out int value) && value >= min && value <= max)
+                {
+                    return value;
+                }
+                Console.WriteLine("Niepoprawny wybór. Spróbuj ponownie.");
+            }
+        }
+    }
+}

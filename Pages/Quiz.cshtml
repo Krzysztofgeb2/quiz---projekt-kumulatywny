@@ -1,0 +1,8 @@
+@page
+@model QuizModel
+
+<h1>Quiz</h1>
+
+<component type="typeof(QuizWebApp.Components.QuizRunner)"
+           render-mode="ServerPrerendered"
+           param-QuizId="@Model.QuizId" />
